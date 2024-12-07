@@ -18,13 +18,13 @@ def generate_cipher(key, iv):
 
 def encrypt(cipher, face_data):
     encryptor = cipher.encryptor()
-    ct = encryptor.update(face_data) + encryptor.finalize()
-    return ct
+    encrypted = encryptor.update(face_data) + encryptor.finalize()
+    return encrypted
 
 
-def decrypt(cipher, ct):
+def decrypt(cipher, encrypted):
     decryptor = cipher.decryptor()
-    decrypted_data = decryptor.update(ct) + decryptor.finalize()
+    decrypted_data = decryptor.update(encrypted) + decryptor.finalize()
     return decrypted_data
 
 

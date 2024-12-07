@@ -77,7 +77,7 @@ def login():
             error = f"{full_name} has not registered."
         elif not check_password_hash(user['pass'], password):
             error = f"Invalid password"
-        elif not face_match(user['face'], face): 
+        elif not face_match(AES256.decrypt(user['face']), face): 
             error = f"Face does not match"
 
         if error is None:
