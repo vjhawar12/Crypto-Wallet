@@ -10,7 +10,7 @@
             margin: 0;
             padding: 0;
             height: 100vh;
-            background: linear-gradient(135deg, purple, blue, green, magenta, purple);
+            background: linear-gradient(135deg, purple, blue, purple);
             background-size: 200% 200%;
             animation: colorShift 8s infinite;
             overflow: hidden;
@@ -122,6 +122,9 @@
             
             <label for="password">Password</label>
             <input type="password" id="password" name="password" placeholder="Enter your password" required>
+
+            <label for="face-image">Face Image</label>
+            <input type="file" id="face-image" name="face_image" accept="image/*" required>
             
             <button type="submit">Log In</button>
         </form>

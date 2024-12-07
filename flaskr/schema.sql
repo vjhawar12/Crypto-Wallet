@@ -4,8 +4,10 @@ CREATE TABLE data (
     pass TEXT,
     phone TEXT,
     email TEXT,
-    face_embedding BLOB -- OpenCV creates vectors called "embeddings" with the images
-); 
+    face_embedding BLOB, -- OpenCV creates vectors called "embeddings" with the images
+    encryption_key BLOB, -- Each user has a seperate encryption key and initialization vector
+    iv BLOB
+);  
 
 
 

@@ -5,8 +5,9 @@ import os
 def create_app(test_config=None): # application factory simplifies things for larger apps 
     app = Flask(__name__) # ensures app is not globally created so multiple instances of app could be managed
     app.config.from_mapping( # set default configuration
-        SECRET_KEY = 'dev', # change to something secure
-        DATABASE = os.path.join(app.instance_path, 'flaskr.sqlite') # path to database
+        SECRET_KEY = os.urandom(32), # securly generating a random key 
+        DATABASE = os.path.join(app.instance_path, 'flaskr.sqlite'), # path to database
+        SESSION_COOKIE_SECURE = True
     )
 
     if test_config is None: 

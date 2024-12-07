@@ -3,6 +3,7 @@ from flask import Blueprint, flash, g, redirect, render_template, request, sessi
 from werkzeug.security import check_password_hash, generate_password_hash
 from flaskr.db import get_db
 import skimage as ski
+import flaskr.AES256 as AES256
 
 bp = Blueprint('auth', __name__, url_prefix='/') # all html files in templates, no subfolders
 
@@ -28,10 +29,16 @@ def register(): # for new user
         if error is None:
             try: 
                 sqlite_insert = """ INSERT INTO data 
-                                (full_name, pass, phone, email, face_embedding) 
-                                VALUES (?, ?, ?, ?, ?); """
+                                (full_name, pass, phone, email, face_embedding, encryption_key, iv) 
+                                VALUES (?, ?, ?, ?, ?, ?, ?); """
                 hashed_password = generate_password_hash(password) # generating a hashed password
-                data_tuple = (full_name, hashed_password, phone, email, face) 
+                
+                # use AES 256 to ecrypt user face data
+                key, iv = AES256.generate_key()
+                cipher = AES256.generate_cipher(key, iv)
+                encrypted_face = AES256.encrypt(cipher, face)
+
+                data_tuple = (full_name, hashed_password, phone, email, encrypted_face, key, iv) 
                 db.execute(sqlite_insert, data_tuple) # adding user to database
                 db.commit()
             except db.IntegrityError as e:
@@ -74,16 +81,26 @@ def login():
             error = f"Face does not match"
 
         if error is None:
-            session.clear()
+            session.clear() # clearing cookies
             session['user_id'] = user['id']
-            return redirect(url_for("account.home"))
+            return redirect(url_for("account.home")) # fillout this view later
         
         flash(error)
 
     return render_template("/login.html")
 
+@bp.before_app_request
+def load_logged_in_user():
+    user_id = session.get("user_id") # getting user_id from the dictionry session (stored as a cookie)
+    if user_id is None: # if user not found in session (not logged in, session expired/cleared/corrupted)
+        g.user = None # no user logged in
+    else:
+        command =  "SELECT * FROM users WHERE id = ?"
+        g.user = get_db().execute(command, (user_id,)).fetchone() # getting user data based on id
 
-    
-        
 
+@bp.route("/logout", methods=['GET', 'POST'])
+def logout():
+    session.clear() # clearing cookies
+    return redirect(url_for("auth.login")) # redirecting to login page
 
