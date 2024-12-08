@@ -2,20 +2,20 @@ import functools
 from flask import Blueprint, flash, g, redirect, render_template, request, session, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 from flaskr.db import get_db
-import skimage as ski
+from flaskr.account import account
 import flaskr.AES256 as AES256
 import face_recognition
 from PIL import Image
 from io import BytesIO
 
-bp = Blueprint('auth', __name__, url_prefix='/') # all html files in templates, no subfolders
+auth = Blueprint('auth', __name__, url_prefix='/') # all html files in templates, no subfolders
 
-""" Compares if user's face input matches stored value of face closely """ 
+""" Computes distance between input face and stored face and checks if distance within tolerance """ 
 # db_face is BLOB and input face is jpg
-def face_match(known_face, input_face, tolerance=0.6):
+def face_match(known_face, input_face, tolerance=0.6): # less than 0.6 tolerance is too strict
     known_data = Image.open(BytesIO(known_face)) # converts blob to file object 
     known_image_file = known_data.save("f.jpg", format='jpg') # converts file to jpg file
-    # apply face_recognition compare_faces function to compare faces
+    
     known_image_file_array = face_recognition.load_image_file(known_image_file)
     input_image_file_array = face_recognition.load_image_file(input_face)
 
@@ -23,10 +23,9 @@ def face_match(known_face, input_face, tolerance=0.6):
     input_image_file_encoding = face_recognition.face_encodings(input_image_file_array)[0]
 
     face_distance = face_recognition.face_distance(known_image_encoding, input_image_file_encoding)
-
     return face_distance <= tolerance
 
-@bp.route('/register', methods=('GET', 'POST')) 
+@auth.route('/register', methods=('GET', 'POST')) 
 def register(): # for new user
     if request.method == 'POST': # to sign up
         full_name = request.args['full_name']
@@ -38,7 +37,7 @@ def register(): # for new user
         db = get_db()
         error = None
 
-        if not full_name or not password or not not phone or not email or not face: 
+        if not full_name or not password or not phone or not email or not face: 
             error = "Please fill out all fields"
 
         if error is None:
@@ -68,7 +67,7 @@ def register(): # for new user
     return(render_template("register.html"))
 
 
-@bp.route("/login", methods=['GET', 'POST'])
+@auth.route("/login", methods=['GET', 'POST'])
 def login(): 
     if request.method == 'POST':
         full_name = request.args['full_name']
@@ -104,7 +103,7 @@ def login():
 
     return render_template("/login.html")
 
-@bp.before_app_request
+@auth.before_app_request
 def load_logged_in_user():
     user_id = session.get("user_id") # getting user_id from the dictionry session (stored as a cookie)
     if user_id is None: # if user not found in session (not logged in, session expired/cleared/corrupted)
@@ -113,8 +112,17 @@ def load_logged_in_user():
         command =  "SELECT * FROM users WHERE id = ?"
         g.user = get_db().execute(command, (user_id,)).fetchone() # getting user data based on id
 
+def login_required(view): # takes each view and makes sure user is logged in before routing there
+    @functools.wraps(view) 
+    def wrapped_view(**kwargs):
+        if g.user is None:
+            return redirect(url_for('auth.login'))
+        
+        return view(**kwargs)
+    return wrapped_view
 
-@bp.route("/logout", methods=['GET', 'POST'])
+
+@auth.route("/logout", methods=['GET', 'POST'])
 def logout():
     session.clear() # clearing cookies
     return redirect(url_for("auth.login")) # redirecting to login page

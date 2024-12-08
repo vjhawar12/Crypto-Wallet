@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Form</title>
     <style>
+        /* General Body Styling */
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 0;
             height: 100vh;
-            background: linear-gradient(135deg, purple, blue, purple);
+            background: linear-gradient(135deg, #4b0082, #00008b, #4b0082);
             background-size: 200% 200%;
             animation: colorShift 8s infinite;
             overflow: hidden;
@@ -19,26 +20,28 @@
             align-items: center;
             color: #fff;
         }
+
+        /* Background Animation */
         @keyframes colorShift {
             0% { background-position: 0% 50%; }
-            25% { background-position: 50% 50%; }
             50% { background-position: 100% 50%; }
-            75% { background-position: 50% 50%; }
             100% { background-position: 0% 50%; }
         }
+
+        /* Floating Orbs */
         .orb {
             position: absolute;
             width: 50px;
             height: 50px;
-            background: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.2);
             border-radius: 50%;
-            animation: float 8s infinite;
+            animation: float 10s infinite ease-in-out;
         }
         .orb:nth-child(1) { top: 10%; left: 20%; animation-delay: 0s; }
         .orb:nth-child(2) { top: 30%; left: 70%; animation-delay: 2s; }
         .orb:nth-child(3) { top: 50%; left: 40%; animation-delay: 4s; }
-        .orb:nth-child(4) { top: 80%; left: 10%; animation-delay: 6s; }
-        .orb:nth-child(5) { top: 60%; left: 90%; animation-delay: 8s; }
+        .orb:nth-child(4) { top: 80%; left: 15%; animation-delay: 6s; }
+        .orb:nth-child(5) { top: 60%; left: 85%; animation-delay: 8s; }
 
         @keyframes float {
             0%, 100% {
@@ -46,27 +49,31 @@
                 opacity: 0.8;
             }
             50% {
-                transform: translateY(-20px) scale(1.2);
+                transform: translateY(-20px) scale(1.1);
                 opacity: 1;
             }
         }
+
+        /* Login Container Styling */
         .login-container {
             background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(12px);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
             width: 100%;
             max-width: 400px;
             text-align: center;
         }
         .login-container h2 {
             margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: bold;
         }
         .login-container label {
             display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
+            margin-bottom: 10px;
+            font-weight: 600;
             color: #fff;
         }
         .login-container input {
@@ -77,6 +84,8 @@
             border-radius: 8px;
             font-size: 16px;
             outline: none;
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
         }
         .login-container input::placeholder {
             color: #ddd;
@@ -84,36 +93,78 @@
         .login-container button {
             width: 100%;
             padding: 12px;
-            background-color: #8a2be2;
+            background-color: #6a0dad;
             color: #fff;
             border: none;
             border-radius: 8px;
             font-size: 18px;
+            font-weight: bold;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
         }
         .login-container button:hover {
-            background-color: #5d1a9c;
+            background-color: #4e0077;
+            transform: scale(1.05);
         }
-        .login-container .forgot-password {
+        .forgot-password {
             margin-top: 10px;
         }
-        .login-container .forgot-password a {
+        .forgot-password a {
             color: #fff;
             text-decoration: none;
+            font-size: 14px;
         }
-        .login-container .forgot-password a:hover {
+        .forgot-password a:hover {
             text-decoration: underline;
         }
+
+        .custom-file-input {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .custom-file-input input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 50px;
+            cursor: pointer;
+        }
+
+        .custom-file-input span {
+            display: block;
+            padding: 12px 16px;
+            background-color: #8a2be2;
+            color: #fff;
+            text-align: center;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+
+        .custom-file-input span:hover {
+            background-color: #5d1a9c;
+        }
+
+        .submit {
+            margin-top: 20px;
+        }
+
     </style>
 </head>
 <body>
+    <!-- Floating Orbs -->
     <div class="orb"></div>
     <div class="orb"></div>
     <div class="orb"></div>
     <div class="orb"></div>
     <div class="orb"></div>
 
+    <!-- Login Form -->
     <div class="login-container">
         <h2>Login</h2>
         <form action="/submit-login" method="POST">
@@ -124,9 +175,12 @@
             <input type="password" id="password" name="password" placeholder="Enter your password" required>
 
             <label for="face-image">Face Image</label>
-            <input type="file" id="face-image" name="face_image" accept="image/*" required>
+            <div class="custom-file-input">
+                <input type="file" id="face-image" name="face_image" accept="image/*" required>
+                <span>Upload Face Image</span>
+            </div>
             
-            <button type="submit">Log In</button>
+            <button class="submit" type="submit">Log In</button>
         </form>
         <div class="forgot-password">
             <a href="/forgot-password">Forgot your password?</a>
