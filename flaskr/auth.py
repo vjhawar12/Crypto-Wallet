@@ -4,12 +4,27 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from flaskr.db import get_db
 import skimage as ski
 import flaskr.AES256 as AES256
+import face_recognition
+from PIL import Image
+from io import BytesIO
 
 bp = Blueprint('auth', __name__, url_prefix='/') # all html files in templates, no subfolders
 
 """ Compares if user's face input matches stored value of face closely """ 
-def face_match(db_face, input_face):
-    return True
+# db_face is BLOB and input face is jpg
+def face_match(known_face, input_face, tolerance=0.6):
+    known_data = Image.open(BytesIO(known_face)) # converts blob to file object 
+    known_image_file = known_data.save("f.jpg", format='jpg') # converts file to jpg file
+    # apply face_recognition compare_faces function to compare faces
+    known_image_file_array = face_recognition.load_image_file(known_image_file)
+    input_image_file_array = face_recognition.load_image_file(input_face)
+
+    known_image_encoding = face_recognition.face_encodings(known_image_file_array)[0]
+    input_image_file_encoding = face_recognition.face_encodings(input_image_file_array)[0]
+
+    face_distance = face_recognition.face_distance(known_image_encoding, input_image_file_encoding)
+
+    return face_distance <= tolerance
 
 @bp.route('/register', methods=('GET', 'POST')) 
 def register(): # for new user
