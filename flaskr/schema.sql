@@ -9,5 +9,9 @@ CREATE TABLE data (
     iv BLOB
 );  
 
+CREATE TABLE wallet (
+    public_key TEXT, 
+    private_key TEXT,
+);  
 
 

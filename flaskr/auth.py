@@ -7,6 +7,8 @@ import flaskr.AES256 as AES256
 import face_recognition
 from PIL import Image
 from io import BytesIO
+from bitcoinlib.wallets import Wallet
+
 
 auth = Blueprint('auth', __name__, url_prefix='/') # all html files in templates, no subfolders
 
@@ -55,6 +57,17 @@ def register(): # for new user
                 data_tuple = (full_name, hashed_password, phone, email, encrypted_face, key, iv) 
                 db.execute(sqlite_insert, data_tuple) # adding user to database
                 db.commit()
+
+                # generate wallet address
+                w = Wallet.create("Wallet 1")
+                key1 = w.get_key()
+                public_key = key1.public_hex
+                private_key = key1.private_hex
+                sqlite_insert = """ INSERT INTO wallet (public_key, private_key) VALUES (?, ?) """
+                data_tuple = (public_key, private_key)
+                db.execute(sqlite_insert, data_tuple)
+                db.commit()
+
             except db.IntegrityError as e:
                 print(e)
                 error = f"{full_name} is already registered."
