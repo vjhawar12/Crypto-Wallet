@@ -1,5 +1,10 @@
 from flask import Flask
 import os
+from flask_talisman import Talisman
+from proxy import proxy
+
+def start_proxy_server(): # routes client requests to proxy; proxy to server while masking IP
+    pass
 
 """ different test_config files could be passed in for different testing """
 def create_app(test_config=None): # application factory simplifies things for larger apps 
@@ -14,11 +19,15 @@ def create_app(test_config=None): # application factory simplifies things for la
         app.config.from_pyfile('config.py', silent=True) # create the file if DNE
     else:
         app.config.from_mapping(test_config) # load the config file
+
+    start_proxy_server()
     
     try:
         os.makedirs(app.instance_path) # creates directory with instance files like db.py
     except OSError: # handled so app doesn't crash
         pass
+
+    Talisman(app) # enforces HTTPS
 
     from . import db, auth
     db.init_app(app)

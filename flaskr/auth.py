@@ -9,7 +9,6 @@ from PIL import Image
 from io import BytesIO
 from bitcoinlib.wallets import Wallet
 
-
 auth = Blueprint('auth', __name__, url_prefix='/') # all html files in templates, no subfolders
 
 """ Computes distance between input face and stored face and checks if distance within tolerance """ 
@@ -32,36 +31,36 @@ def register(): # for new user
     if request.method == 'POST': # to sign up
         full_name = request.args['full_name']
         password = request.args['password']
-        phone = request.args['phone_number']
         email = request.args['email']
         face = request.args['face_image']
 
         db = get_db()
         error = None
 
-        if not full_name or not password or not phone or not email or not face: 
+        if not full_name or not password or not email or not face: 
             error = "Please fill out all fields"
 
         if error is None:
             try: 
                 sqlite_insert = """ INSERT INTO data 
-                                (full_name, pass, phone, email, face_embedding, encryption_key, iv) 
-                                VALUES (?, ?, ?, ?, ?, ?, ?); """
+                                (full_name, pass, email, face_embedding, encryption_key, iv) 
+                                VALUES (?, ?, ?, ?, ?, ?); """
+               
                 hashed_password = generate_password_hash(password) # generating a hashed password
-                
+                hashed_email = generate_password_hash(email) # generating a hashed email
                 # use AES 256 to ecrypt user face data
                 key, iv = AES256.generate_key()
                 cipher = AES256.generate_cipher(key, iv)
                 encrypted_face = AES256.encrypt(cipher, face)
 
-                data_tuple = (full_name, hashed_password, phone, email, encrypted_face, key, iv) 
+                data_tuple = (full_name, hashed_password, hashed_email, encrypted_face, key, iv) 
                 db.execute(sqlite_insert, data_tuple) # adding user to database
                 db.commit()
 
                 # generate wallet address
                 w = Wallet.create("Wallet 1")
                 key1 = w.get_key()
-                public_key = key1.public_hex
+                public_key = key1.public_hex    
                 private_key = key1.private_hex
                 sqlite_insert = """ INSERT INTO wallet (public_key, private_key) VALUES (?, ?) """
                 data_tuple = (public_key, private_key)
@@ -118,6 +117,7 @@ def login():
 
 @auth.before_app_request
 def load_logged_in_user():
+    request.environ['REMOTE_ADDR'] = '0.0.0.0' # masking IP address by setting it to 0.0.0.0
     user_id = session.get("user_id") # getting user_id from the dictionry session (stored as a cookie)
     if user_id is None: # if user not found in session (not logged in, session expired/cleared/corrupted)
         g.user = None # no user logged in
