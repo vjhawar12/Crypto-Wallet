@@ -117,7 +117,6 @@ def login():
 
 @auth.before_app_request
 def load_logged_in_user():
-    request.environ['REMOTE_ADDR'] = '0.0.0.0' # masking IP address by setting it to 0.0.0.0
     user_id = session.get("user_id") # getting user_id from the dictionry session (stored as a cookie)
     if user_id is None: # if user not found in session (not logged in, session expired/cleared/corrupted)
         g.user = None # no user logged in
