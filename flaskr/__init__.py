@@ -4,6 +4,8 @@ from flask_talisman import Talisman
 import requests
 import threading
 
+from . import authenticate
+
 """ different test_config files could be passed in for different testing """
 def create_app(test_config=None): # application factory simplifies things for larger apps
 
@@ -50,8 +52,8 @@ def create_app(test_config=None): # application factory simplifies things for la
 
     Talisman(app) # enforces HTTPS
 
-    from . import db, auth
+    from . import db
     db.init_app(app)
-    app.register_blueprint(auth.bp)
+    app.register_blueprint(authenticate.bp)
 
     return app 
